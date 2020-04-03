@@ -17,7 +17,7 @@ year={2020}
 }
 ```
 
-![5-Figure2-1](.\assets\5-Figure2-1.png)
+![5-Figure2-1](./assets/5-Figure2-1.png)
 
 
 
@@ -27,11 +27,11 @@ You can run a demo local machine or [colab](https://colab.research.google.com/dr
 
 To run the test/train code, please clone this repo and see below instructions.
 
-![small](.\assets\small.gif)
+![small](./assets/small.gif)
 
 ## Dependencies
 
-We provide [requirements.txt](.\requirements.txt).
+We provide [requirements.txt](./requirements.txt).
 
 - Python 3   (Recommend to use Anaconda)
 - numpy
@@ -57,7 +57,7 @@ We provide [requirements.txt](.\requirements.txt).
    - [cbsd68](https://github.com/cszn/FFDNet/tree/master/testsets)
    - urban100
 
-3. Run the [test script](.\run_test.sh).
+3. Run the [test script](./run_test.sh).
 
    ```
    sh run_test.sh
