@@ -1,0 +1,78 @@
+
+experiment:
+  # Logging
+  name: Null
+  git_hash_id: Null
+  comet_disabled: True
+  comet_project_name: GTCNN
+  info: info # Provide infomation
+  comment: comment # We use auto commit
+  # Overall
+  color: 3
+  seed: 2018
+  sigma: 50
+  model_save_dir: ./Trained_model/
+  device_ids: [0] # GPU ID. If you use multi GPU, set like [0,1,2,3]
+  # Test
+  test_only: False
+  best_model: None # filename of  saved model (Not need .pth)
+  saveImage: False # Will be save in local
+  chop: False # To run havy models which proposed by privous  works. We dont prioved this function in this repo
+  chop_size: 36864 # size
+  #Train
+  checkpoint_resume: False
+  save_checkpoint: False
+  checkpoint_PATH: None # if load checkpoint(need fullpath)
+  opt_level: False # a level of apex.amp(mixed precision). optins: None,O1,O2
+  epoch_num: 400
+  lr: 0.001
+  handle_test_size: True  # pad to test/val images for odd image size
+  test_mod_size: 160 # pad to test/val images  for odd image size
+  imgSize: 192 # Training image size 
+  stride: 192 # stride of croping process
+  patch_crop: True # Use Patches for Training
+  large_size: False # To use random crop you should set the large_size as 512
+  scales: [1] # Use [0.25,0.5,1] for Augmantation
+  random_corp: False # 
+  #####################
+  # random corp settings 
+  # random_corp: True 
+  # large_size: 512 
+  #####################
+  scheduler: CosineAnnealingLR
+  # scheduler: ExponentialLR
+  # scheduler: MultiStepLR
+  # scheduler_milestones: [100,200]
+  # scheduler_gamma: 0.94
+  batchsize: 50
+  num_of_img_for_train: [0,-1] #  [0,-1] is mean entir dataset.  if it seted as [0,10], use only 10 images from dataset.
+
+dataset:
+  name: Div2k # This name for logging
+  train_root: Dataset/train/
+  val_root: Dataset/val/
+  test_root: Dataset/test/
+  train_set: [DIV2K]
+  test_set: [CBSD68,Urban100]
+  val_set: [DIV2K]
+
+model:
+  name: GTCNN # This model_name is also use for call the model_name.py
+  # noise stream
+  depth: 1
+  image_channels: ${experiment.color}
+  n_channels: 64
+  kernel_size: 3
+  use_bnorm: True
+  # GTL 
+  GTL_IC: 64
+  GTL_OC: 64
+  GTL_NC: 64
+  GTL_num_cbr: 2 # num of CBR bloacks in each satage.
+  GTL_ACT: softmax
+  GTL_upmodule: bilinear
+  GTL_pooling: maxpool
+  GTL_stage_option: slim
+  # GTL_stage_option: outconv_slim # FOR D6
+  GTL_concat_type: concat
+  GTL_stages: 4
