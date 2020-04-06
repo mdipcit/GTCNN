@@ -87,7 +87,7 @@ More detailed see the How to Edit Config.
    sh run_train.sh
    ```
 
-If you do not have enough ram (required at least 64GB), you could use random crop options (We don't confirm the performance, expect not bad).  Also, We recommend use apex if the GPU ram doesn't make enough. 
+If you do not have enough RAM (required at least 64GB), you could use random crop options (We don't confirm the performance, expect not bad).  Also, We recommend use apex if the VRAM of GPU doesn't  enough to training. 
 
 - random crop: `sh run_random_crop_train.sh`
 - Train with apex: `sh run_apex_train.sh`
@@ -124,5 +124,5 @@ python main.py confs/GTCNN experiment.color=1 experiment.device_ids=[0,1,2,4] ex
   - Use comet log: `experiment.comet_disabled=False`
   - For Depth>5: `model.GTL_stage_option=outconv_slim`
 
-And more details see the GTCNN.yaml
+And more details see the [GTCNN.yaml](./confs/GTCNN.yaml)
 
