@@ -92,6 +92,8 @@ If you do not have enough ram (required at least 64GB), you could use random cro
 - random crop: `sh run_random_crop_train.sh`
 - Train with apex: `sh run_apex_train.sh`
 
+Note you should set the flag `model.GTL_stage_option=outconv_slim`, if the model depth is more than 5.
+
 ## How to Edit Config
 
 If you want to change the configuration of experiments  (e.g,. batch size, depth, apex), you can edit the  default config (GTCNN.yaml) by OmegaConf.  
@@ -109,17 +111,18 @@ python main.py confs/GTCNN experiment.color=1 experiment.device_ids=[0,1,2,4] ex
 ```
 
 - Examples
-  1. Change color to gray or color: `experiment.color=1` or `=3`
-  2. Change the noise level: `experiment.sigma=40`
-  3. Use multi or change GPU:   `experiment.device_ids=[0]` or  `=[3]` or  `=[0,1,2,3]`
-  4. Run test: `experiment.test_only=True`
-  5. Load your pretrain: `experiment.bestmodel =FileName`
-  6. save the denoised images in the local folder: `experiment.saveImage=True`
-  7. Use Apex: :`experiment.opt_level=O1` or `=O2`
-  8. Change BatchSize: `experiment.batchsize=256` 
-  9. Change the depth of model: `model.depth=5`
-  10. Use your testset: `dataset.test_set=[YourDataset1,YourDataset2]`
-  11. Use comet log: `experiment.comet_disabled=False`
+  - Change color to gray or color: `experiment.color=1` or `=3`
+  - Change the noise level: `experiment.sigma=40`
+  - Use multi or change GPU:   `experiment.device_ids=[0]` or  `=[3]` or  `=[0,1,2,3]`
+  - Run test: `experiment.test_only=True`
+  - Load your pretrain: `experiment.bestmodel =FileName`
+  - save the denoised images in the local folder: `experiment.saveImage=True`
+  - Use Apex: :`experiment.opt_level=O1` or `=O2`
+  - Change BatchSize: `experiment.batchsize=256` 
+  - Change the depth of model: `model.depth=5`
+  - Use your testset: `dataset.test_set=[YourDataset1,YourDataset2]`
+  - Use comet log: `experiment.comet_disabled=False`
+  - For Depth>5: `model.GTL_stage_option=outconv_slim`
 
 And more details see the GTCNN.yaml
 

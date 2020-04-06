@@ -1,18 +1,18 @@
 # Gray 50 GTCNND1
-python main.py confs/GTCNN experiment.color=1 dataset.test_set=[Set12,Set68,Urban100]
+python main.py confs/GTCNN experiment.color=1 dataset.test_set=[Set12,BSD68,Urban100]
 # Gray 50 GTCNND3
-python main.py confs/GTCNN experiment.color=1 model.depth=3 experiment.batchsize=30 dataset.test_set=[Set12,Set68,Urban100]
+python main.py confs/GTCNN experiment.color=1 model.depth=3 experiment.batchsize=30 dataset.test_set=[Set12,BSD68,Urban100]
 # Gray 50 GTCNND6
-python main.py confs/GTCNN experiment.color=1 model.depth=6 experiment.batchsize=12 model.GTL_stage_option=outconv_slim  dataset.test_set=[Set12,Set68,Urban100]
+python main.py confs/GTCNN experiment.color=1 model.depth=6 experiment.batchsize=12 model.GTL_stage_option=outconv_slim  dataset.test_set=[Set12,BSD68,Urban100]
 
 
 ###########
 # GTCNN-D1
 ###########
 # Gray 30
-python main.py confs/GTCNN experiment.sigma=30 experiment.color=1  dataset.test_set=[Set12,Set68,Urban100]
+python main.py confs/GTCNN experiment.sigma=30 experiment.color=1  dataset.test_set=[Set12,BSD68,Urban100]
 # Gray 70
-python main.py confs/GTCNN experiment.sigma=70 experiment.color=1  dataset.test_set=[Set12,Set68,Urban100]
+python main.py confs/GTCNN experiment.sigma=70 experiment.color=1  dataset.test_set=[Set12,BSD68,Urban100]
 
 # Color 50 
 python main.py confs/GTCNN   
