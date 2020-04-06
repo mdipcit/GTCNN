@@ -15,7 +15,6 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
-import seaborn as sns
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torchvision.utils as vutils
