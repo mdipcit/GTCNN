@@ -12,7 +12,7 @@ experiment:
   seed: 2018
   sigma: 50
   model_save_dir: ./Trained_model/
-  device_ids: [0] # GPU ID. If you use multi GPU, set like [0,1,2,3]
+  device_ids: [2] # GPU ID. If you use multi GPU, set like [0,1,2,3]
   # Test
   test_only: False
   best_model: None # filename of  saved model (Not need .pth)
@@ -25,9 +25,10 @@ experiment:
   checkpoint_PATH: None # if load checkpoint(need fullpath)
   opt_level: False # a level of apex.amp(mixed precision). optins: None,O1,O2
   epoch_num: 400
+  val_interval: 5
   lr: 0.001
   handle_test_size: True  # pad to test/val images for odd image size
-  test_mod_size: 160 # pad to test/val images  for odd image size
+  test_mod_size: 16 # pad to test/val images  for odd image size
   imgSize: 192 # Training image size 
   stride: 192 # stride of croping process
   patch_crop: True # Use Patches for Training

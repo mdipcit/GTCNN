@@ -79,7 +79,7 @@ class Cnn_test():
             #     print(k)
             # print('Param:', utils.count_parameters_in_MB(model))
 
-            state_dict = torch.load(self.model_save_dir+model_file_name+'.pth')
+            state_dict = torch.load(self.model_save_dir+model_file_name+'.pth', map_location="cuda:"+str(self.gpuID))
             from collections import OrderedDict
             tmp=self.model_save_dir+model_file_name+'.pth'
             if tmp.find('checkpoint') >=0:
@@ -117,7 +117,13 @@ class Cnn_test():
                     ssims = []
                     im_num=0
                     file_list = sorted(os.listdir(os.path.join(self.test_root,set_cur)))
-                    
+
+                    np.random.seed(seed=self.hyper_params['seed'])  # for reproducibility
+                    torch.manual_seed(self.hyper_params['seed'])
+                    torch.cuda.manual_seed(self.hyper_params['seed'])
+                    torch.backends.cudnn.benchmark = True
+                    torch.backends.cudnn.enabled = True
+
                     for im in file_list:
                         if im.endswith(".jpg") or im.endswith(".bmp") or im.endswith(".png"):
                             im_num+=1
@@ -175,9 +181,4 @@ class Cnn_test():
             self.experiment.log_metric("entir_test_avg_psnr", np.mean(all_PSNR))
 
     def __call__(self):
-        np.random.seed(seed=self.hyper_params['seed'])  # for reproducibility
-        torch.manual_seed(self.hyper_params['seed'])
-        torch.cuda.manual_seed(self.hyper_params['seed'])
-        torch.backends.cudnn.benchmark = True
-        torch.backends.cudnn.enabled = True
         self.ex_test(self.hyper_params["best_model"],self.test_set)

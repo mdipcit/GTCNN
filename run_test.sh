@@ -14,9 +14,9 @@ python main.py confs/GTCNN experiment.sigma=30 experiment.color=1 experiment.tes
 python main.py confs/GTCNN experiment.sigma=70 experiment.color=1 experiment.test_only=True experiment.best_model=Gray70_GTCNN_D1 dataset.test_set=[Set12,BSD68,Urban100]
 
 # Color 50 
-python main.py confs/GTCNN experiment.test_only=True experiment.best_model=Color50_GTCNN_D1 
+python main.py confs/GTCNN experiment.sigma=50 experiment.color=3 experiment.test_only=True experiment.best_model=Color50_GTCNN_D1 
 
 # Color 30
-python main.py confs/GTCNN experiment.sigma=30 experiment.test_only=True experiment.best_model=Color30_GTCNN_D1 
+python main.py confs/GTCNN experiment.sigma=30 experiment.color=3 experiment.test_only=True experiment.best_model=Color30_GTCNN_D1 
 # Color 70
-python main.py confs/GTCNN experiment.sigma=70 experiment.test_only=True experiment.best_model=Color70_GTCNN_D1
+python main.py confs/GTCNN experiment.sigma=70 experiment.color=3 experiment.test_only=True experiment.best_model=Color70_GTCNN_D1

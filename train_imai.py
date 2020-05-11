@@ -41,7 +41,7 @@ except ImportError:
 
 class CNN_train():
     def __init__(self,hyper_params=[]):
-        #  load options
+        #  ----------------load options--------------------------
         self.Experiment_Confs = hyper_params
         self.Model_conf =  hyper_params.model
         self.Data_conf =  hyper_params.dataset
@@ -64,25 +64,25 @@ class CNN_train():
         self.test_root=self.Data_conf['test_root']
         self.val_root=self.Data_conf['val_root']
         self.train_root=self.Data_conf['train_root']
-        self.test_set =  self.Data_conf['val_set']
+        self.val_set =  self.Data_conf['val_set']
+        self.test_set =  self.Data_conf['test_set']
         self.train_set =  self.Data_conf['train_set']
         if not os.path.exists(self.model_save_dir):
             os.makedirs(self.model_save_dir)
-        #  ----------------load options--------------------------
+
+
         #  ----------------load dataset--------------------------
+        print(self.val_set)
+        self.val_dataset = dg.Get_test_set(self.val_set,self.val_root,self.hyper_params)
         xs = dg.nsat_datagenerator(root=self.train_root,classes = self.train_set, batch_size=self.batchsize, 
         patch_size=self.imgSize,Nsat=self.Nsat,patch_crop=self.hyper_params['patch_crop'],large_size=self.hyper_params['large_size'],stride=self.hyper_params['stride'],scales=self.hyper_params['scales'],color=self.hyper_params['color'])
         self.num_work = 1
         xs = xs.astype('float32')/255.0
         xs = torch.from_numpy(xs.transpose((0, 3, 1, 2)))  # tensor of the clean patches, NXCXHXW
-        # test_set = get_training_set(test_input_dir, test_target_dir, False)
         DDataset = DenoisingDataset(xs, self.sigma,self.imgSize,self.hyper_params['random_corp'])
-        # sub_indices= list(range(0,Nsat))
-        # DDataset=Subset(DDataset,sub_indices)
         print('-------------------')
         print('      TRAIN SET    ')
         print(self.train_set)
-        print('-------------------')
         print('-------------------')
         print('-------------------')
         print('      Train Data Shapes    ')
@@ -92,10 +92,8 @@ class CNN_train():
         print(len(xs))
         print('-------------------')
         print('-------------------')
-        print('-------------------')
         torch.manual_seed(self.hyper_params['seed'])
         self.dataloader  = DataLoader(dataset=DDataset, num_workers=self.num_work, collate_fn=DDataset.collate_fn,drop_last=True, batch_size=self.batchsize, pin_memory=True,shuffle=True)
-        #  ----------------load dataset--------------------------
 
 
     def __call__(self):
@@ -190,25 +188,13 @@ class CNN_train():
         print('Param:', utils.count_parameters_in_MB(model))
 
 
-        #----------------------------- Set  Val------------------------------------------
+        # #----------------------------- Set  Val------------------------------------------
 
-        val_interval =5
-        if epoch_num>600:
-            val_interval =10
-        if epoch_num>2000:
-            val_interval =50
-
-
-        file_lists=[] # load test set for val  
-        print('-------------------')
-        print('       VAL SET     ')
-        print('-------------------')
-        for set_cur in self.test_set:
-
-            print('SET:'+set_cur)
-            file_list = sorted(os.listdir(os.path.join(self.val_root , set_cur)))
-            file_lists.append(file_list)
-        print('-------------------')
+        val_interval = self.hyper_params.val_interval
+        # if epoch_num>600:
+        #     val_interval =10
+        # if epoch_num>2000:
+        #     val_interval =50
 
         #----------------------------------------------------------------------------------------------------------------
         #-----------------------------------experiment.train--------------------------------------
@@ -217,18 +203,20 @@ class CNN_train():
             step_iter=0
             start_epoch=1
             # checkpoint
-            if checkpoint_resume:
-                checkpoint = torch.load(checkpoint_PATH)
+            if checkpoint_resume==True:
+                tmp=self.model_save_dir+checkpoint_PATH+'.pth'
+                checkpoint = torch.load(tmp)
                 model.load_state_dict(checkpoint['model_state_dict'])
                 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+                if 'scheduler_state_dict' in checkpoint.keys():
+                    scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
                 if opt_level=="O1" or opt_level=="O2":
-                    amp.load_state_dict(checkpoint['amp'])
+                    if 'scheduler_state_dict' in checkpoint.keys():
+                        amp.load_state_dict(checkpoint['amp'])
+                    else:
+                        print('this state_dict dose not have amp')
                 start_epoch = checkpoint['epoch']
                 print('resume checkpoint from:'+str(start_epoch))
-                for epoch in range(1, start_epoch):
-                    scheduler.step(epoch)
-                    for ite, (input, target) in enumerate(self.dataloader):
-                        pass
 
             # Train loop
             for epoch in range(start_epoch, epoch_num+1):
@@ -285,59 +273,43 @@ class CNN_train():
                             test_psnr = 0
                             test_ssim = 0
                             psnrs_all = []
-                            for label_index,(set_cur,file_list) in enumerate(zip(self.test_set,file_lists)):
+                            for label_index,val_data in enumerate(self.val_dataset):
+                                set_cur = val_data[0]
+                                file_list = val_data[1]
                                 print(set_cur)
                                 psnrs = []
                                 ssims = []
                                 im_num=0
                                 for im in file_list:
-                                    if im.endswith(".jpg") or im.endswith(".bmp") or im.endswith(".png"):
-                                        im_num+=1
-                                        # -------------------------load image ----------------
-                                        if self.hyper_params['color'] == 1:
-                                            x_original =  cv2.imread(os.path.join(self.val_root ,set_cur, im), 0)
-                                        elif self.hyper_params['color'] == 3:
-                                            x_original = cv2.imread(os.path.join(self.val_root ,set_cur, im), cv2.IMREAD_UNCHANGED) # BGR or G
-                                        if handle_test_size:
-                                            x,x_w_pad_size,x_h_pad_size = utils.pad_to_image(x_original,test_mod_size)
-                                        else:
-                                            x = x_original
+                                    x_original, y_, x_w_pad_size, x_h_pad_size = im
 
-                                        x =x.astype(np.float32)/255.0
-                                        y = x + np.random.normal(0, self.sigma/255.0, x.shape)  # Add Gaussian noise without clipping
-                                        y = y.astype(np.float32)
-                                        if y.ndim == 3:
-                                            y = np.transpose(y, (2,0, 1))
-                                            y_ = torch.from_numpy(y).unsqueeze(0)
-                                        else:
-                                            y_ = torch.from_numpy(y).view(1, -1, y.shape[0], y.shape[1])
-                                        
-                                        torch.cuda.synchronize()
-                                        start_time = time.time()
+                                    torch.cuda.synchronize()
+                                    start_time = time.time()
 
-                                        # -------------------------inference ----------------
+                                    # -------------------------inference ----------------
 
-                                        y_ = y_.cuda(gpuID)
-                                        x_ = model(y_)  # inference
-                                        x_ = utils.tensor2uint(x_)
+                                    y_ = y_.cuda(gpuID)
+                                    x_ = model(y_)  # inference
+                                    x_ = utils.tensor2uint(x_)
 
-                                        torch.cuda.synchronize()
-                                        elapsed_time = time.time() - start_time
+                                    torch.cuda.synchronize()
+                                    elapsed_time = time.time() - start_time
 
-                                        # -------------------------calc ----------------
+                                    # -------------------------calc ----------------
 
-                                        if handle_test_size:
-                                            x_ = utils.shave_pad(x_,x_w_pad_size,x_h_pad_size)
-                                        psnr_x_ = utils.calculate_psnr( x_,x_original)
-                                        ssim_x_ = utils.calculate_ssim( x_,x_original)
+                                    if handle_test_size:
+                                        x_ = utils.shave_pad(x_,x_w_pad_size,x_h_pad_size)
+                                    psnr_x_ = utils.calculate_psnr( x_,x_original)
+                                    ssim_x_ = utils.calculate_ssim( x_,x_original)
 
-                                        psnrs.append(psnr_x_)
-                                        psnrs_all.append(psnr_x_)
-                                        ssims.append(ssim_x_)
-                                        self.experiment.log_metric("per_psnr_im_num"+str(im_num), psnr_x_, step=epoch)
+                                    psnrs.append(psnr_x_)
+                                    psnrs_all.append(psnr_x_)
+                                    ssims.append(ssim_x_)
+                                    # self.experiment.log_metric("per_psnr_im_num"+str(im_num), psnr_x_, step=epoch)
 
                                 psnr_avg = np.mean(psnrs)
                                 ssim_avg = np.mean(ssims)
+                                self.experiment.log_metric("VAL_PSNR_"+set_cur, psnr_avg, step=epoch)
 
                             psnrs_all_avg = np.mean(psnrs_all)
                             self.experiment.log_metric("psnr_avg_entir_val_sets", psnrs_all_avg, step=epoch)
@@ -350,18 +322,20 @@ class CNN_train():
                                 print('-------best_psnr---------')
                                 print(best_psnr)
                                 best_model='best_%s_%d' % (self.hyper_params.name, int(epoch))
-                            if save_checkpoint:
+                            if save_checkpoint: 
                                 save_model_name='checkpoint_%s_%d' % (self.hyper_params.name, int(epoch))
                                 if opt_level=="O1" or opt_level=="O2":
                                     torch.save({ 'epoch': epoch+1,
                                                 'model_state_dict': model.state_dict(),
                                                 'optimizer_state_dict': optimizer.state_dict(),
+                                                'scheduler_state_dict': scheduler.state_dict(),
                                                 'amp': amp.state_dict()
                                                 }, self.model_save_dir+save_model_name+'.pth')
                                 else:
                                     torch.save({ 'epoch': epoch+1,
                                                 'model_state_dict': model.state_dict(),
                                                 'optimizer_state_dict': optimizer.state_dict(),
+                                                'scheduler_state_dict': scheduler.state_dict(),
                                                 }, self.model_save_dir+save_model_name+'.pth')
 
 #----------------------------------------------------------------------------------------------------------------

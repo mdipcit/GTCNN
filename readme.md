@@ -37,7 +37,7 @@ We provide [requirements.txt](./requirements.txt).
 - numpy
 - PyTorch >= 1.0
 - torchvision
-- NVIDIA GPU + CUDA
+- NVIDIA GPU + CUDA(>10)
 - opencv
 - tqdm
 - PyYAML
@@ -70,6 +70,8 @@ python main.py confs/GTCNN experiment.test_only=True experiment.best_model=Color
 ```
 
 More detailed see the How to Edit Config.
+
+Note that our model was trained in the BGR.
 
 ## Demo of Texture Modification 
 
@@ -125,4 +127,3 @@ python main.py confs/GTCNN experiment.color=1 experiment.device_ids=[0,1,2,4] ex
   - For Depth>5: `model.GTL_stage_option=outconv_slim`
 
 And more details see the [GTCNN.yaml](./confs/GTCNN.yaml)
-
