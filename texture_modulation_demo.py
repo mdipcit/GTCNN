@@ -59,7 +59,7 @@ class TM_Demo():
         self.iamge_path=iamge_path
         self.model = eval(self.Model_conf.name)(self.Model_conf)
 
-        state_dict = torch.load(self.model_save_dir+self.hyper_params["best_model"]+'.pth')
+        state_dict = torch.load(self.model_save_dir+self.hyper_params["best_model"]+'.pth', map_location="cuda:"+str(self.gpuID))
         from collections import OrderedDict
         tmp=self.model_save_dir+self.hyper_params["best_model"]+'.pth'
         if tmp.find('checkpoint') >=0:
